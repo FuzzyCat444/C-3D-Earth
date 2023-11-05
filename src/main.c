@@ -170,33 +170,35 @@ void traceGlobe(uint8_t* screen, int width, int height,
             };
             // Find point where ray hits sphere and the surface normal.
             Vec3 p = raySphere(o, u, c, r);
-            Vec3 n = sphereNormal(c, r, p);
-            
-            // Calculate brightness of point on sphere from light source.
-            double bright = -vdot(n, light);
-            int brightI = (int) (bright * 6.0);
-            if (brightI > 3) brightI = 3;
-            else if (brightI < 0) brightI = 0;
-            
-            // Rotate normals so that texture will be sampled at different
-            // locations so it appears the sphere itself is rotating.
-            n = vrotxy(n, cTilt, sTilt);
-            n = vrotzx(n, cRot, sRot);
-            
-            // Sample texture value (0 or 1, ocean or land).
-            int texX = texCoordX(n, EARTH_DATA_WIDTH);
-            int texY = texCoordY(n, EARTH_DATA_HEIGHT);
-            int sample = sampleEarthData(texX, texY);
             
             // Ray hit the globe.
-            if (!isinf(p.x))
+            if (!isinf(p.x)) {
+                Vec3 n = sphereNormal(c, r, p);
+            
+                // Calculate brightness of point on sphere from light source.
+                double bright = -vdot(n, light);
+                int brightI = (int) (bright * 6.0);
+                if (brightI > 3) brightI = 3;
+                else if (brightI < 0) brightI = 0;
+                
+                // Rotate normals so that texture will be sampled at different
+                // locations so it appears the sphere itself is rotating.
+                n = vrotxy(n, cTilt, sTilt);
+                n = vrotzx(n, cRot, sRot);
+                
+                // Sample texture value (0 or 1, ocean or land).
+                int texX = texCoordX(n, EARTH_DATA_WIDTH);
+                int texY = texCoordY(n, EARTH_DATA_HEIGHT);
+                int sample = sampleEarthData(texX, texY);
+                
                 // Select one of four colors for ocean or one of four colors
                 // for land.
                 screen[i] = 1 + 4 * sample + brightI;
             // Ray did not hit the globe
-            else
+            } else {
                 // Set color to background color (black).
                 screen[i] = 0;
+            }
             
             i++;
         }
